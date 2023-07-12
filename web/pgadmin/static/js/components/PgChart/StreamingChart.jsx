@@ -58,44 +58,32 @@ function tooltipPlugin(refreshRate) {
   };
 }
 
-export default function StreamingChart({xRange=75, data, options}) {
+export default function StreamingChart({xRange=75, data, options, showSecondAxis=false}) {
   const chartRef = useRef();
   const theme = useTheme();
   const { width, height, ref:containerRef } = useResizeDetector();
-  const defaultOptions = useMemo(()=>({
-    title: '',
-    width: width,
-    height: height,
-    padding: [10, 0, 10, 0],
-    focus: {
-      alpha: 0.3,
-    },
-    cursor: {
-      y: false,
-      drag: {
-        setScale: false,
-      }
-    },
-    series: [
+  const defaultOptions = useMemo(()=> {
+    const series = [
       {},
-      ...(data.datasets?.map((datum)=>({
+      ...(data.datasets?.map((datum, index) => ({
         label: datum.label,
         stroke: datum.borderColor,
         width: options.lineBorderWidth ?? 1,
-        points: { show: options.showDataPoints ?? false, size: datum.pointHitRadius*2 }
-      }))??{})
-    ],
-    scales: {
-      x: {
-        time: false,
-      }
-    },
-    axes: [
+        scale: showSecondAxis && (index === 1) ? 'y1' : 'y',
+        points: { show: options.showDataPoints ?? false, size: datum.pointHitRadius * 2 },
+      })) ?? []),
+    ];
+
+    const axes = [
       {
         show: false,
         stroke: theme.palette.text.primary,
       },
-      {
+    ];
+
+    if(showSecondAxis){
+      axes.push({
+        scale: 'y',
         grid: {
           stroke: theme.otherVars.borderColor,
           width: 0.5,
@@ -108,11 +96,104 @@ export default function StreamingChart({xRange=75, data, options}) {
             if(size < 40) size = 40;
           }
           return size;
+        },
+        // y-axis configuration
+        values: (self, ticks) => {
+          // Format the label
+          return ticks.map((value) => {
+            if(value < 1){
+              return value+"";
+            }
+            const suffixes = ["", "k", "M", "B", "T"];
+            const suffixNum = Math.floor(Math.log10(value) / 3);
+            const shortValue = (value / Math.pow(1000, suffixNum)).toFixed(1);
+            return shortValue + suffixes[suffixNum];
+          });
         }
-      }
-    ],
-    plugins: options.showTooltip ? [tooltipPlugin(data.refreshRate)] : [],
-  }), [data.refreshRate, data?.datasets?.length, width, height, options]);
+      });
+      axes.push({
+        scale: 'y1',
+        side: 1,
+        stroke: theme.palette.text.primary,
+        grid: {show: false},
+        size: function(_obj, values) {
+          let size = 40;
+          if(values?.length > 0) {
+            size = values[values.length-1].length*12;
+            if(size < 40) size = 40;
+          }
+          return size;
+        },
+        // y-axis configuration
+        values: (self, ticks) => {
+          // Format the label
+          return ticks.map((value) => {
+            if(value < 1){
+              return value+"";
+            }
+            const suffixes = ["", "k", "M", "B", "T"];
+            const suffixNum = Math.floor(Math.log10(value) / 3);
+            const shortValue = (value / Math.pow(1000, suffixNum)).toFixed(1);
+            return shortValue + suffixes[suffixNum];
+          });
+        }
+      });
+    } else{
+      axes.push({
+        scale: 'y',
+        grid: {
+          stroke: theme.otherVars.borderColor,
+          width: 0.5,
+        },
+        stroke: theme.palette.text.primary,
+        size: function(_obj, values) {
+          let size = 40;
+          if(values?.length > 0) {
+            size = values[values.length-1].length*12;
+            if(size < 40) size = 40;
+          }
+          return size;
+        },
+        // y-axis configuration
+        values: (self, ticks) => {
+          // Format the label
+          return ticks.map((value) => {
+            if(value < 1){
+              return value+"";
+            }
+            const suffixes = ["", "k", "M", "B", "T"];
+            const suffixNum = Math.floor(Math.log10(value) / 3);
+            const shortValue = (value / Math.pow(1000, suffixNum)).toFixed(1);
+            return shortValue + suffixes[suffixNum];
+          });
+        }
+      });
+    }
+  
+    return {
+      title: '',
+      width: width,
+      height: height,
+      padding: [10, 0, 10, 0],
+      focus: {
+        alpha: 0.3,
+      },
+      cursor: {
+        y: false,
+        drag: {
+          setScale: false,
+        }
+      },
+      series: series,
+      scales: {
+        x: {
+          time: false,
+        }
+      },
+      axes: axes,
+      plugins: options.showTooltip ? [tooltipPlugin(data.refreshRate)] : [],
+    };
+  }, [data.refreshRate, data?.datasets?.length, width, height, options]);
 
   const initialState = [
     Array.from(new Array(xRange).keys()),
@@ -140,4 +221,5 @@ StreamingChart.propTypes = {
   xRange: PropTypes.number.isRequired,
   data: propTypeData.isRequired,
   options: PropTypes.object,
+  showSecondAxis: PropTypes.bool,
 };

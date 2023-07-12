@@ -197,6 +197,9 @@ class DashboardModule(PgAdminModule):
             'dashboard.get_prepared_by_database_id',
             'dashboard.config',
             'dashboard.get_config_by_server_id',
+            'dashboard.system_statistics',
+            'dashboard.system_statistics_sid',
+            'dashboard.system_statistics_did',
         ]
 
 
@@ -534,5 +537,40 @@ def terminate_session(sid=None, did=None, pid=None):
 
     return ajax_response(
         response=gettext("Success") if res else gettext("Failed"),
+        status=200
+    )
+
+
+# System Statistics Backend
+@blueprint.route('/system_statistics',
+                 endpoint='system_statistics', methods=['GET'])
+@blueprint.route('/system_statistics/<int:sid>',
+                 endpoint='system_statistics_sid', methods=['GET'])
+@blueprint.route('/system_statistics/<int:sid>/<int:did>',
+                 endpoint='system_statistics_did', methods=['GET'])
+
+@login_required
+@check_precondition
+def system_statistics(sid=None, did=None):
+    resp_data = {}
+
+    if request.args['chart_names'] != '':
+        chart_names = request.args['chart_names'].split(',')
+
+        if not sid:
+            return internal_server_error(errormsg='Server ID not specified.')
+
+        sql = render_template(
+            "/".join([g.template_path, 'system_statistics.sql']), did=did,
+            chart_names=chart_names,
+        )
+        status, res = g.conn.execute_dict(sql)
+
+        for chart_row in res['rows']:
+            resp_data[chart_row['chart_name']] = json.loads(
+                chart_row['chart_data'])
+
+    return ajax_response(
+        response=resp_data,
         status=200
     )

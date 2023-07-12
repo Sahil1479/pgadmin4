@@ -29,6 +29,9 @@ import _ from 'lodash';
 import CachedOutlinedIcon from '@material-ui/icons/CachedOutlined';
 import EmptyPanelMessage from '../../../static/js/components/EmptyPanelMessage';
 import TabPanel from '../../../static/js/components/TabPanel';
+import Summary from './Summary';
+import CPU from './CPU';
+import Memory from './Memory';
 
 function parseData(data) {
   let res = [];
@@ -154,10 +157,14 @@ export default function Dashboard({
   const [msg, setMsg] = useState('');
   const [tabVal, setTabVal] = useState(0);
   const [mainTabVal, setmainTabVal] = useState(0);
-  const [systemStatsTabVal, setSystemStatsTabVal] = useState(0);
   const [refresh, setRefresh] = useState(false);
   const [activeOnly, setActiveOnly] = useState(false);
   const [schemaDict, setSchemaDict] = React.useState({});
+  const [systemStatsTabVal, setSystemStatsTabVal] = useState(0);
+      
+  const systemStatsTabChanged = (e, tabVal) => {
+      setSystemStatsTabVal(tabVal);
+  };
 
   if (!did) {
     tabs.push(gettext('Configuration'));
@@ -169,10 +176,6 @@ export default function Dashboard({
 
   const mainTabChanged = (e, tabVal) => {
     setmainTabVal(tabVal);
-  };
-
-  const systemStatsTabChanged = (e, tabVal) => {
-    setSystemStatsTabVal(tabVal);
   };
 
   const serverConfigColumns = [
@@ -959,8 +962,8 @@ export default function Dashboard({
                 </TabPanel>
                 {/* System Statistics */}
                 <TabPanel value={mainTabVal} index={1} classNameRoot={classes.tabPanel}>
-                  <Box height="100%" display="flex" flexDirection="column">
-                    <Box>
+                <Box height="100%" display="flex" flexDirection="column">
+                  <Box>
                       <Tabs
                         value={systemStatsTabVal}
                         onChange={systemStatsTabChanged}
@@ -969,20 +972,38 @@ export default function Dashboard({
                           return <Tab key={tabValue} label={tabValue} />;
                         })}
                       </Tabs>
-                    </Box>
-                    <TabPanel value={systemStatsTabVal} index={0} classNameRoot={classes.tabPanel}>
-                      Summary
-                    </TabPanel>
-                    <TabPanel value={systemStatsTabVal} index={1} classNameRoot={classes.tabPanel}>
-                      CPU
-                    </TabPanel>
-                    <TabPanel value={systemStatsTabVal} index={2} classNameRoot={classes.tabPanel}>
-                      Memory
-                    </TabPanel>
-                    <TabPanel value={systemStatsTabVal} index={3} classNameRoot={classes.tabPanel}>
-                      Storage
-                    </TabPanel>
                   </Box>
+                  <TabPanel value={systemStatsTabVal} index={0} classNameRoot={classes.tabPanel}>
+                    <Summary
+                      key={sid + did}
+                      sid={sid} 
+                      did={did}
+                      pageVisible={props.panelVisible}
+                      serverConnected={props.serverConnected}
+                    />
+                  </TabPanel>
+                  <TabPanel value={systemStatsTabVal} index={1} classNameRoot={classes.tabPanel}>
+                    <CPU
+                      key={sid + did}
+                      sid={sid} 
+                      did={did}
+                      pageVisible={props.panelVisible}
+                      serverConnected={props.serverConnected}
+                    />
+                  </TabPanel>
+                  <TabPanel value={systemStatsTabVal} index={2} classNameRoot={classes.tabPanel}>
+                    <Memory
+                      key={sid + did}
+                      sid={sid} 
+                      did={did}
+                      pageVisible={props.panelVisible}
+                      serverConnected={props.serverConnected}
+                    />
+                  </TabPanel>
+                  <TabPanel value={systemStatsTabVal} index={3} classNameRoot={classes.tabPanel}>
+                      Storage
+                  </TabPanel>
+              </Box>
                 </TabPanel>
               </Box>
             </Box>
