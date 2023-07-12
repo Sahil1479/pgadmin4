@@ -58,3 +58,6 @@ web/.coverage
 web/regression/.coverage
 web/regression/covhtml/
 web/regression/htmlcov/
+
+contrib/
+winenv/
