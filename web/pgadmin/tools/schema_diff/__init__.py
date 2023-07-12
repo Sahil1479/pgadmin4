@@ -127,8 +127,6 @@ def panel(trans_id, editor_title):
         "schema_diff/index.html",
         _=gettext,
         trans_id=trans_id,
-        requirejs=True,
-        basejs=True,
         editor_title=editor_title,
     )
 
@@ -562,9 +560,6 @@ def compare_database(params):
                 comparison_result = \
                     comparison_result + comparison_schema_result
 
-        msg = gettext("Successfully compare the specified databases.")
-        total_percent = 100
-        diff_model_obj.set_comparison_info(msg, total_percent)
         # Update the message and total percentage done in session object
         update_session_diff_transaction(params['trans_id'], session_obj,
                                         diff_model_obj)
@@ -625,9 +620,6 @@ def compare_schema(params):
         comparison_result = \
             comparison_result + comparison_schema_result
 
-        msg = gettext("Successfully compare the specified schemas.")
-        total_percent = 100
-        diff_model_obj.set_comparison_info(msg, total_percent)
         # Update the message and total percentage done in session object
         update_session_diff_transaction(params['trans_id'], session_obj,
                                         diff_model_obj)
