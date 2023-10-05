@@ -20,17 +20,25 @@ const useStyles = makeStyles((theme) => ({
   container: {
     height: 'auto',
     padding: '8px',
-    marginBottom: '15px',
+    marginBottom: '6px',
+  },
+  driveContainer: {
+    width: '100%',
   },
   diskInfoContainer: {
     height: 'auto',
-    padding: '8px',
-    marginBottom: '15px',
+    padding: '8px 8px 0px 8px',
+    marginBottom: '0px',
   },
   diskInfoSummary: {
     height: 'auto',
-    padding: '0px',
-    marginBottom: '5px',
+    padding: '0px 0px 4px 0px',
+    marginBottom: '0px',
+  },
+  diskInfoCharts: {
+    height: 'auto',
+    padding: '0px 0px 2px 0px',
+    marginBottom: '0px',
   },
   containerHeaderText: {
     fontWeight: 'bold',
@@ -42,9 +50,9 @@ const useStyles = makeStyles((theme) => ({
     border: '1px solid '+theme.otherVars.borderColor,
     borderCollapse: 'collapse',
     borderRadius: '4px',
-    overflow: 'hidden',
+    overflow: 'auto',
     width: '100%',
-    margin: '4px 4px 15px 4px',
+    margin: '4px 4px 4px 4px',
   },
   tableWhiteSpace: {
     '& td, & th': {
@@ -410,19 +418,19 @@ export function StorageWrapper(props) {
             <DiskStatsTable tableHeader={props.tableHeader} data={props.diskStats} />
           </div>
         </Grid>
-        <Grid container spacing={1} className={classes.diskInfoSummary}>
+        <Grid container spacing={1} className={classes.diskInfoCharts}>
           <Grid item md={6} sm={12}>
             <ChartContainer 
               id='t-space-graph' 
               title={gettext('')} 
               datasets={props.diskStats.map((item, index) => ({
                 borderColor: colors[(index + 2) % colors.length],
-                label: item.mount_point !== 'null' ? item.mount_point : item.drive_letter !== 'null' ? item.drive_letter : 'disk' + index,
+                label: item.mount_point !== '' ? item.mount_point : item.drive_letter !== '' ? item.drive_letter : 'disk' + index,
               }))}
               errorMsg={props.errorMsg} 
               isTest={props.isTest}>
               <PieChart data={{
-                labels: props.diskStats.map((item, index) => item.mount_point!='null'?item.mount_point:item.drive_letter!='null'?item.drive_letter:'disk'+index),
+                labels: props.diskStats.map((item, index) => item.mount_point!=''?item.mount_point:item.drive_letter!=''?item.drive_letter:'disk'+index),
                 datasets: [
                   {
                     data: props.diskStats.map((item) => item.total_space_actual?item.total_space_actual:0),
@@ -456,7 +464,7 @@ export function StorageWrapper(props) {
           <Grid item md={6} sm={12}>
             <ChartContainer id='ua-space-graph' title={gettext('')} datasets={[{borderColor: '#FF6384', label: 'Used space'}, {borderColor: '#36a2eb', label: 'Available space'}]}  errorMsg={props.errorMsg} isTest={props.isTest}>
               <BarChart data={{
-                labels: props.diskStats.map((item, index) => item.mount_point!='null'?item.mount_point:item.drive_letter!='null'?item.drive_letter:'disk'+index),
+                labels: props.diskStats.map((item, index) => item.mount_point!=''?item.mount_point:item.drive_letter!=''?item.drive_letter:'disk'+index),
                 datasets: [
                   {
                     label: 'Used space',
